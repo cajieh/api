@@ -140,6 +140,7 @@ spec:
                       Recommended logo specifications:
                       Dimensions: Max height of 68px and max width of 200px
                       SVG format preferred
+                      Deprecated: Use CustomLogos instead.
                     properties:
                       key:
                         description: key allows pointing to a specific key/value inside
@@ -148,6 +149,67 @@ spec:
                       name:
                         type: string
                     type: object
+                  customLogos:
+                    description: "customLogos replaces the default OpenShift logo
+                      in the masthead and about dialog.\nIt references a ConfigMap
+                      in the openshift-config namespace. You can create it with a
+                      command like:\n'oc create configmap custom-logos-config \\\n\t--namespace=openshift-config
+                      \\\n\t--from-literal=Masthead-Dark=/path/to/file \\\n\t--from-literal=Masthead-Light=/path/to/file
+                      \\\n\t--from-literal=Favicon-Dark=/path/to/file \\\n\t--from-literal=Favicon-Light=/path/to/file`\nThe
+                      ConfigMap keys should include file extensions for dark and light
+                      themes so that the console serves these files\nwith the correct
+                      MIME type.\nRecommended Mssthead and About Modal logo specifications:\nImage
+                      size must be less than 1 MB due to constraints on the ConfigMap
+                      size\nDimensions: Max height of 68px and max width of 200px\nSVG
+                      format preferred\nRecommended favicon specifications:\nDimensions:
+                      Max height of 16px and max width of 16px\nPNG format preferred"
+                    items:
+                      description: CustomLogos defines a configuration based on theme
+                        types for the console UI logo.
+                      properties:
+                        path:
+                          description: |-
+                            path is the reference to a specific file within a ConfigMap in the openshift-config namespace.
+                            This field allows the console to locate and use the specified file containing a custom logo.
+                            The ConfigMap must be created with the appropriate keys and file extensions to ensure the console serves the file with the correct MIME type.
+                            The keys are "Masthead-Dark", "Masthead-Light", "Favicon-Dark", and "Favicon-Light".
+                          properties:
+                            key:
+                              description: key allows pointing to a specific key/value
+                                inside of the configmap.  This is useful for logical
+                                file references.
+                              type: string
+                            name:
+                              type: string
+                          type: object
+                        theme:
+                          description: |-
+                            theme specifies the theme type for the console UI logo. It determines whether the console should use the dark or light theme.
+                            This field is an enum with valid values "Dark" and "Light".
+                          enum:
+                          - Dark
+                          - Light
+                          type: string
+                        type:
+                          description: |-
+                            type specifies the type of the logo for the console UI. It determines whether the logo is for the masthead or favicon.
+                            This field is an enum with valid values "Masthead" and "Favicon".
+                          enum:
+                          - Masthead
+                          - Favicon
+                          type: string
+                      required:
+                      - path
+                      - theme
+                      - type
+                      type: object
+                    maxItems: 4
+                    minItems: 1
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - type
+                    - theme
+                    x-kubernetes-list-type: map
                   customProductName:
                     description: |-
                       customProductName is the name that will be displayed in page titles, logo alt text, and the about dialog

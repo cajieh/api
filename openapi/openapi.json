@@ -27048,9 +27048,22 @@
           "x-kubernetes-list-type": "map"
         },
         "customLogoFile": {
-          "description": "customLogoFile replaces the default OpenShift logo in the masthead and about dialog. It is a reference to a ConfigMap in the openshift-config namespace. This can be created with a command like 'oc create configmap custom-logo --from-file=/path/to/file -n openshift-config'. Image size must be less than 1 MB due to constraints on the ConfigMap size. The ConfigMap key should include a file extension so that the console serves the file with the correct MIME type. Recommended logo specifications: Dimensions: Max height of 68px and max width of 200px SVG format preferred",
+          "description": "customLogoFile replaces the default OpenShift logo in the masthead and about dialog. It is a reference to a ConfigMap in the openshift-config namespace. This can be created with a command like 'oc create configmap custom-logo --from-file=/path/to/file -n openshift-config'. Image size must be less than 1 MB due to constraints on the ConfigMap size. The ConfigMap key should include a file extension so that the console serves the file with the correct MIME type. Recommended logo specifications: Dimensions: Max height of 68px and max width of 200px SVG format preferred Deprecated: Use CustomLogos instead.",
           "default": {},
           "$ref": "#/definitions/com.github.openshift.api.config.v1.ConfigMapFileReference"
+        },
+        "customLogos": {
+          "description": "customLogos replaces the default OpenShift logo in the masthead and about dialog. It references a ConfigMap in the openshift-config namespace. You can create it with a command like: 'oc create configmap custom-logos-config \\\n\t--namespace=openshift-config \\\n\t--from-literal=Masthead-Dark=/path/to/file \\\n\t--from-literal=Masthead-Light=/path/to/file \\\n\t--from-literal=Favicon-Dark=/path/to/file \\\n\t--from-literal=Favicon-Light=/path/to/file`\nThe ConfigMap keys should include file extensions for dark and light themes so that the console serves these files with the correct MIME type. Recommended Mssthead and About Modal logo specifications: Image size must be less than 1 MB due to constraints on the ConfigMap size Dimensions: Max height of 68px and max width of 200px SVG format preferred Recommended favicon specifications: Dimensions: Max height of 16px and max width of 16px PNG format preferred",
+          "type": "array",
+          "items": {
+            "default": {},
+            "$ref": "#/definitions/com.github.openshift.api.operator.v1.CustomLogo"
+          },
+          "x-kubernetes-list-map-keys": [
+            "type",
+            "theme"
+          ],
+          "x-kubernetes-list-type": "map"
         },
         "customProductName": {
           "description": "customProductName is the name that will be displayed in page titles, logo alt text, and the about dialog instead of the normal OpenShift product name.",
@@ -27252,6 +27265,32 @@
           "description": "maxLength is the maximum length of the log message.\n\nValid values are integers in the range 480 to 8192, inclusive.\n\nWhen omitted, the default value is 1024.",
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "com.github.openshift.api.operator.v1.CustomLogo": {
+      "description": "CustomLogos defines a configuration based on theme types for the console UI logo.",
+      "type": "object",
+      "required": [
+        "type",
+        "theme",
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "description": "path is the reference to a specific file within a ConfigMap in the openshift-config namespace. This field allows the console to locate and use the specified file containing a custom logo. The ConfigMap must be created with the appropriate keys and file extensions to ensure the console serves the file with the correct MIME type. The keys are \"Masthead-Dark\", \"Masthead-Light\", \"Favicon-Dark\", and \"Favicon-Light\".",
+          "default": {},
+          "$ref": "#/definitions/com.github.openshift.api.config.v1.ConfigMapFileReference"
+        },
+        "theme": {
+          "description": "theme specifies the theme type for the console UI logo. It determines whether the console should use the dark or light theme. This field is an enum with valid values \"Dark\" and \"Light\".",
+          "type": "string",
+          "default": ""
+        },
+        "type": {
+          "description": "type specifies the type of the logo for the console UI. It determines whether the logo is for the masthead or favicon. This field is an enum with valid values \"Masthead\" and \"Favicon\".",
+          "type": "string",
+          "default": ""
         }
       }
     },

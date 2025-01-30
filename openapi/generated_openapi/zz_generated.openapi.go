@@ -910,6 +910,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/operator/v1.ConsoleSpec":                                                   schema_openshift_api_operator_v1_ConsoleSpec(ref),
 		"github.com/openshift/api/operator/v1.ConsoleStatus":                                                 schema_openshift_api_operator_v1_ConsoleStatus(ref),
 		"github.com/openshift/api/operator/v1.ContainerLoggingDestinationParameters":                         schema_openshift_api_operator_v1_ContainerLoggingDestinationParameters(ref),
+		"github.com/openshift/api/operator/v1.CustomLogo":                                                    schema_openshift_api_operator_v1_CustomLogo(ref),
 		"github.com/openshift/api/operator/v1.DNS":                                                           schema_openshift_api_operator_v1_DNS(ref),
 		"github.com/openshift/api/operator/v1.DNSCache":                                                      schema_openshift_api_operator_v1_DNSCache(ref),
 		"github.com/openshift/api/operator/v1.DNSList":                                                       schema_openshift_api_operator_v1_DNSList(ref),
@@ -46399,6 +46400,29 @@ func schema_openshift_api_operator_v1_ConsoleCustomization(ref common.ReferenceC
 				Description: "ConsoleCustomization defines a list of optional configuration for the console UI.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"customLogos": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"type",
+									"theme",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "customLogos replaces the default OpenShift logo in the masthead and about dialog. It references a ConfigMap in the openshift-config namespace. You can create it with a command like: 'oc create configmap custom-logos-config \\\n\t--namespace=openshift-config \\\n\t--from-literal=Masthead-Dark=/path/to/file \\\n\t--from-literal=Masthead-Light=/path/to/file \\\n\t--from-literal=Favicon-Dark=/path/to/file \\\n\t--from-literal=Favicon-Light=/path/to/file`\nThe ConfigMap keys should include file extensions for dark and light themes so that the console serves these files with the correct MIME type. Recommended Mssthead and About Modal logo specifications: Image size must be less than 1 MB due to constraints on the ConfigMap size Dimensions: Max height of 68px and max width of 200px SVG format preferred Recommended favicon specifications: Dimensions: Max height of 16px and max width of 16px PNG format preferred",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openshift/api/operator/v1.CustomLogo"),
+									},
+								},
+							},
+						},
+					},
 					"capabilities": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
@@ -46444,7 +46468,7 @@ func schema_openshift_api_operator_v1_ConsoleCustomization(ref common.ReferenceC
 					},
 					"customLogoFile": {
 						SchemaProps: spec.SchemaProps{
-							Description: "customLogoFile replaces the default OpenShift logo in the masthead and about dialog. It is a reference to a ConfigMap in the openshift-config namespace. This can be created with a command like 'oc create configmap custom-logo --from-file=/path/to/file -n openshift-config'. Image size must be less than 1 MB due to constraints on the ConfigMap size. The ConfigMap key should include a file extension so that the console serves the file with the correct MIME type. Recommended logo specifications: Dimensions: Max height of 68px and max width of 200px SVG format preferred",
+							Description: "customLogoFile replaces the default OpenShift logo in the masthead and about dialog. It is a reference to a ConfigMap in the openshift-config namespace. This can be created with a command like 'oc create configmap custom-logo --from-file=/path/to/file -n openshift-config'. Image size must be less than 1 MB due to constraints on the ConfigMap size. The ConfigMap key should include a file extension so that the console serves the file with the correct MIME type. Recommended logo specifications: Dimensions: Max height of 68px and max width of 200px SVG format preferred Deprecated: Use CustomLogos instead.",
 							Default:     map[string]interface{}{},
 							Ref:         ref("github.com/openshift/api/config/v1.ConfigMapFileReference"),
 						},
@@ -46503,7 +46527,7 @@ func schema_openshift_api_operator_v1_ConsoleCustomization(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.ConfigMapFileReference", "github.com/openshift/api/operator/v1.AddPage", "github.com/openshift/api/operator/v1.Capability", "github.com/openshift/api/operator/v1.DeveloperConsoleCatalogCustomization", "github.com/openshift/api/operator/v1.Perspective", "github.com/openshift/api/operator/v1.ProjectAccess", "github.com/openshift/api/operator/v1.QuickStarts"},
+			"github.com/openshift/api/config/v1.ConfigMapFileReference", "github.com/openshift/api/operator/v1.AddPage", "github.com/openshift/api/operator/v1.Capability", "github.com/openshift/api/operator/v1.CustomLogo", "github.com/openshift/api/operator/v1.DeveloperConsoleCatalogCustomization", "github.com/openshift/api/operator/v1.Perspective", "github.com/openshift/api/operator/v1.ProjectAccess", "github.com/openshift/api/operator/v1.QuickStarts"},
 	}
 }
 
@@ -46780,6 +46804,45 @@ func schema_openshift_api_operator_v1_ContainerLoggingDestinationParameters(ref 
 				},
 			},
 		},
+	}
+}
+
+func schema_openshift_api_operator_v1_CustomLogo(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CustomLogos defines a configuration based on theme types for the console UI logo.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "type specifies the type of the logo for the console UI. It determines whether the logo is for the masthead or favicon. This field is an enum with valid values \"Masthead\" and \"Favicon\".",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"theme": {
+						SchemaProps: spec.SchemaProps{
+							Description: "theme specifies the theme type for the console UI logo. It determines whether the console should use the dark or light theme. This field is an enum with valid values \"Dark\" and \"Light\".",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"path": {
+						SchemaProps: spec.SchemaProps{
+							Description: "path is the reference to a specific file within a ConfigMap in the openshift-config namespace. This field allows the console to locate and use the specified file containing a custom logo. The ConfigMap must be created with the appropriate keys and file extensions to ensure the console serves the file with the correct MIME type. The keys are \"Masthead-Dark\", \"Masthead-Light\", \"Favicon-Dark\", and \"Favicon-Light\".",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.ConfigMapFileReference"),
+						},
+					},
+				},
+				Required: []string{"type", "theme", "path"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.ConfigMapFileReference"},
 	}
 }
 
