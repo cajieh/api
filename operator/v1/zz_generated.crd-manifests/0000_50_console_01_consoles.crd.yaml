@@ -149,65 +149,106 @@ spec:
                         type: string
                     type: object
                   customLogos:
-                    description: "customLogos replaces the default OpenShift logo
-                      in the masthead and about dialog.\nIt references a ConfigMap
-                      in the openshift-config namespace. You can create it with a
-                      command like:\n'oc create configmap custom-logos-config \\\n\t--namespace=openshift-config
-                      \\\n\t--from-literal=Masthead-Dark=/path/to/file \\\n\t--from-literal=Masthead-Light=/path/to/file
-                      \\\n\t--from-literal=Favicon-Dark=/path/to/file \\\n\t--from-literal=Favicon-Light=/path/to/file`\nThe
-                      ConfigMap keys should include file extensions for dark and light
-                      themes so that the console serves these files\nwith the correct
-                      MIME type.\nRecommended Mssthead and About Modal logo specifications:\nImage
-                      size must be less than 1 MB due to constraints on the ConfigMap
-                      size\nDimensions: Max height of 68px and max width of 200px\nSVG
-                      format preferred\nRecommended favicon specifications:\nDimensions:
-                      Max height of 16px and max width of 16px\nPNG format preferred"
+                    description: |-
+                      customLogos replaces the default OpenShift logo in the masthead and about dialog.
+                      It references a ConfigMap in the openshift-config namespace. You can create it with a command like:
+                      'oc create configmap custom-logos-config \
+                        --namespace=openshift-config \
+                        --from-literal=MastheadDark=/path/to/file \
+                        --from-literal=MastheadLight=/path/to/file \
+                        --from-literal=FaviconDark=/path/to/file \
+                        --from-literal=FaviconLight=/path/to/file'
+                      The ConfigMap keys should include file extensions for dark and light themes so that the console serves these files with the correct MIME type.
+                      Recommended Masthead and About Modal logo specifications:
+                      Image size must be less than 1 MB due to constraints on the ConfigMap size
+                      Dimensions: Max height of 68px and max width of 200px
+                      SVG format preferred
+                      Recommended Favicon specifications:
+                      Dimensions: Max height of 16px and max width of 16px
+                      PNG format preferred
                     items:
-                      description: CustomLogos defines a configuration based on theme
+                      description: CustomLogo defines a configuration based on theme
                         types for the console UI logo.
                       properties:
-                        path:
+                        refName:
                           description: |-
-                            path is the reference to a specific file within a ConfigMap in the openshift-config namespace.
-                            This field allows the console to locate and use the specified file containing a custom logo.
+                            refName is the reference to a specific ConfigMap name in the openshift-config namespace containing custom logo files.
                             The ConfigMap must be created with the appropriate keys and file extensions to ensure the console serves the file with the correct MIME type.
-                            The keys are "Masthead-Dark", "Masthead-Light", "Favicon-Dark", and "Favicon-Light".
-                          properties:
-                            key:
-                              description: key allows pointing to a specific key/value
-                                inside of the configmap.  This is useful for logical
-                                file references.
-                              type: string
-                            name:
-                              type: string
-                          type: object
-                        theme:
+                            The required keys are "MastheadDark", "MastheadLight", "FaviconDark", and "FaviconLight".
+                          maxLength: 253
+                          minLength: 1
+                          type: string
+                        themes:
                           description: |-
-                            theme specifies the theme type for the console UI logo. It determines whether the console should use the dark or light theme.
-                            This field is an enum with valid values "Dark" and "Light".
+                            themes specifies the themes for the console UI logo.
+                            This field is a list of themes, each with a Type and a RefName.
+                            Each theme determines whether the logo is for the dark or light theme of the console UI.
+                            The valid values for the Type field are "Dark" and "Light".
+                            The RefName field should reference the name of the ConfigMap that contains the logo files.
+                            Each item in the list must have a unique combination of Type and RefName.
                           enum:
                           - Dark
                           - Light
-                          type: string
+                          items:
+                            description: Theme defines a theme type for the console
+                              UI.
+                            properties:
+                              refKey:
+                                description: |-
+                                  refKey is the key pointing to a specific key/value inside the ConfigMap.
+                                  This field is an enum with valid values "MastheadDark", "MastheadLight", "FaviconDark", and "FaviconLight".
+                                  When "MastheadDark" is provided in the ConfigMap, the referenced logo for the dark theme will be used in the masthead of the console UI.
+                                  When "MastheadLight" is provided in the ConfigMap, the referenced logo for the light theme will be used in the masthead of the console UI.
+                                  When "FaviconDark" is provided in the ConfigMap, the referenced logo for the dark theme will be used in the favicon of the console UI.
+                                  When "FaviconLight" is provided in the ConfigMap, the referenced logo for the light theme will be used in the favicon of the console UI.
+                                enum:
+                                - MastheadDark
+                                - MastheadLight
+                                - FaviconDark
+                                - FaviconLight
+                                type: string
+                              type:
+                                description: |-
+                                  type specifies the type of the logo for the console UI.
+                                  This field is an enum with valid values "Dark" and "Light".
+                                  The type determines whether the logo is for the dark or light theme.
+                                  When "Dark" is provided, the corresponding logo for the dark theme will be used in the console UI.
+                                  When "Light" is provided, the corresponding logo for the light theme will be used in the console UI.
+                                enum:
+                                - Dark
+                                - Light
+                                type: string
+                            required:
+                            - refKey
+                            - type
+                            type: object
+                          maxItems: 2
+                          minItems: 1
+                          type: array
+                          x-kubernetes-list-map-keys:
+                          - type
+                          x-kubernetes-list-type: map
                         type:
                           description: |-
                             type specifies the type of the logo for the console UI. It determines whether the logo is for the masthead or favicon.
                             This field is an enum with valid values "Masthead" and "Favicon".
+                            Valid values:
+                            - "Masthead": When this value is provided, the logo will be used in the masthead or about modal of the console UI.
+                            - "Favicon": When this value is provided, the logo will be used as the favicon of the console UI.
                           enum:
                           - Masthead
                           - Favicon
                           type: string
                       required:
-                      - path
-                      - theme
+                      - refName
+                      - themes
                       - type
                       type: object
-                    maxItems: 4
+                    maxItems: 2
                     minItems: 1
                     type: array
                     x-kubernetes-list-map-keys:
                     - type
-                    - theme
                     x-kubernetes-list-type: map
                   customProductName:
                     description: |-

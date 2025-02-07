@@ -248,7 +248,7 @@ func (ConsoleConfigRoute) SwaggerDoc() map[string]string {
 
 var map_ConsoleCustomization = map[string]string{
 	"":                     "ConsoleCustomization defines a list of optional configuration for the console UI.",
-	"customLogos":          "customLogos replaces the default OpenShift logo in the masthead and about dialog. It references a ConfigMap in the openshift-config namespace. You can create it with a command like: 'oc create configmap custom-logos-config \\n\t--namespace=openshift-config \\n\t--from-literal=Masthead-Dark=/path/to/file \\n\t--from-literal=Masthead-Light=/path/to/file \\n\t--from-literal=Favicon-Dark=/path/to/file \\n\t--from-literal=Favicon-Light=/path/to/file`\nThe ConfigMap keys should include file extensions for dark and light themes so that the console serves these files with the correct MIME type. Recommended Mssthead and About Modal logo specifications: Image size must be less than 1 MB due to constraints on the ConfigMap size Dimensions: Max height of 68px and max width of 200px SVG format preferred Recommended favicon specifications: Dimensions: Max height of 16px and max width of 16px PNG format preferred",
+	"customLogos":          "customLogos replaces the default OpenShift logo in the masthead and about dialog. It references a ConfigMap in the openshift-config namespace. You can create it with a command like: 'oc create configmap custom-logos-config \\n  --namespace=openshift-config \\n  --from-literal=MastheadDark=/path/to/file \\n  --from-literal=MastheadLight=/path/to/file \\n  --from-literal=FaviconDark=/path/to/file \\n  --from-literal=FaviconLight=/path/to/file'\nThe ConfigMap keys should include file extensions for dark and light themes so that the console serves these files with the correct MIME type. Recommended Masthead and About Modal logo specifications: Image size must be less than 1 MB due to constraints on the ConfigMap size Dimensions: Max height of 68px and max width of 200px SVG format preferred Recommended Favicon specifications: Dimensions: Max height of 16px and max width of 16px PNG format preferred",
 	"capabilities":         "capabilities defines an array of capabilities that can be interacted with in the console UI. Each capability defines a visual state that can be interacted with the console to render in the UI. Available capabilities are LightspeedButton and GettingStartedBanner. Each of the available capabilities may appear only once in the list.",
 	"brand":                "brand is the default branding of the web console which can be overridden by providing the brand field.  There is a limited set of specific brand options. This field controls elements of the console such as the logo. Invalid value will prevent a console rollout.",
 	"documentationBaseURL": "documentationBaseURL links to external documentation are shown in various sections of the web console.  Providing documentationBaseURL will override the default documentation URL. Invalid value will prevent a console rollout.",
@@ -305,10 +305,10 @@ func (ConsoleStatus) SwaggerDoc() map[string]string {
 }
 
 var map_CustomLogo = map[string]string{
-	"":      "CustomLogos defines a configuration based on theme types for the console UI logo.",
-	"type":  "type specifies the type of the logo for the console UI. It determines whether the logo is for the masthead or favicon. This field is an enum with valid values \"Masthead\" and \"Favicon\".",
-	"theme": "theme specifies the theme type for the console UI logo. It determines whether the console should use the dark or light theme. This field is an enum with valid values \"Dark\" and \"Light\".",
-	"path":  "path is the reference to a specific file within a ConfigMap in the openshift-config namespace. This field allows the console to locate and use the specified file containing a custom logo. The ConfigMap must be created with the appropriate keys and file extensions to ensure the console serves the file with the correct MIME type. The keys are \"Masthead-Dark\", \"Masthead-Light\", \"Favicon-Dark\", and \"Favicon-Light\".",
+	"":        "CustomLogo defines a configuration based on theme types for the console UI logo.",
+	"type":    "type specifies the type of the logo for the console UI. It determines whether the logo is for the masthead or favicon. This field is an enum with valid values \"Masthead\" and \"Favicon\". Valid values: - \"Masthead\": When this value is provided, the logo will be used in the masthead or about modal of the console UI. - \"Favicon\": When this value is provided, the logo will be used as the favicon of the console UI.",
+	"themes":  "themes specifies the themes for the console UI logo. This field is a list of themes, each with a Type and a RefName. Each theme determines whether the logo is for the dark or light theme of the console UI. The valid values for the Type field are \"Dark\" and \"Light\". The RefName field should reference the name of the ConfigMap that contains the logo files. Each item in the list must have a unique combination of Type and RefName.",
+	"refName": "refName is the reference to a specific ConfigMap name in the openshift-config namespace containing custom logo files. The ConfigMap must be created with the appropriate keys and file extensions to ensure the console serves the file with the correct MIME type. The required keys are \"MastheadDark\", \"MastheadLight\", \"FaviconDark\", and \"FaviconLight\".",
 }
 
 func (CustomLogo) SwaggerDoc() map[string]string {
@@ -433,6 +433,16 @@ var map_StatuspageProvider = map[string]string{
 
 func (StatuspageProvider) SwaggerDoc() map[string]string {
 	return map_StatuspageProvider
+}
+
+var map_Theme = map[string]string{
+	"":       "Theme defines a theme type for the console UI.",
+	"type":   "type specifies the type of the logo for the console UI. This field is an enum with valid values \"Dark\" and \"Light\". The type determines whether the logo is for the dark or light theme. When \"Dark\" is provided, the corresponding logo for the dark theme will be used in the console UI. When \"Light\" is provided, the corresponding logo for the light theme will be used in the console UI.",
+	"refKey": "refKey is the key pointing to a specific key/value inside the ConfigMap. This field is an enum with valid values \"MastheadDark\", \"MastheadLight\", \"FaviconDark\", and \"FaviconLight\". When \"MastheadDark\" is provided in the ConfigMap, the referenced logo for the dark theme will be used in the masthead of the console UI. When \"MastheadLight\" is provided in the ConfigMap, the referenced logo for the light theme will be used in the masthead of the console UI. When \"FaviconDark\" is provided in the ConfigMap, the referenced logo for the dark theme will be used in the favicon of the console UI. When \"FaviconLight\" is provided in the ConfigMap, the referenced logo for the light theme will be used in the favicon of the console UI.",
+}
+
+func (Theme) SwaggerDoc() map[string]string {
+	return map_Theme
 }
 
 var map_AWSCSIDriverConfigSpec = map[string]string{

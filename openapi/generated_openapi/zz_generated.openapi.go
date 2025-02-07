@@ -1087,6 +1087,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/operator/v1.StorageSpec":                                                   schema_openshift_api_operator_v1_StorageSpec(ref),
 		"github.com/openshift/api/operator/v1.StorageStatus":                                                 schema_openshift_api_operator_v1_StorageStatus(ref),
 		"github.com/openshift/api/operator/v1.SyslogLoggingDestinationParameters":                            schema_openshift_api_operator_v1_SyslogLoggingDestinationParameters(ref),
+		"github.com/openshift/api/operator/v1.Theme":                                                         schema_openshift_api_operator_v1_Theme(ref),
 		"github.com/openshift/api/operator/v1.Upstream":                                                      schema_openshift_api_operator_v1_Upstream(ref),
 		"github.com/openshift/api/operator/v1.UpstreamResolvers":                                             schema_openshift_api_operator_v1_UpstreamResolvers(ref),
 		"github.com/openshift/api/operator/v1.VSphereCSIDriverConfigSpec":                                    schema_openshift_api_operator_v1_VSphereCSIDriverConfigSpec(ref),
@@ -46405,13 +46406,12 @@ func schema_openshift_api_operator_v1_ConsoleCustomization(ref common.ReferenceC
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
 									"type",
-									"theme",
 								},
 								"x-kubernetes-list-type": "map",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "customLogos replaces the default OpenShift logo in the masthead and about dialog. It references a ConfigMap in the openshift-config namespace. You can create it with a command like: 'oc create configmap custom-logos-config \\\n\t--namespace=openshift-config \\\n\t--from-literal=Masthead-Dark=/path/to/file \\\n\t--from-literal=Masthead-Light=/path/to/file \\\n\t--from-literal=Favicon-Dark=/path/to/file \\\n\t--from-literal=Favicon-Light=/path/to/file`\nThe ConfigMap keys should include file extensions for dark and light themes so that the console serves these files with the correct MIME type. Recommended Mssthead and About Modal logo specifications: Image size must be less than 1 MB due to constraints on the ConfigMap size Dimensions: Max height of 68px and max width of 200px SVG format preferred Recommended favicon specifications: Dimensions: Max height of 16px and max width of 16px PNG format preferred",
+							Description: "customLogos replaces the default OpenShift logo in the masthead and about dialog. It references a ConfigMap in the openshift-config namespace. You can create it with a command like: 'oc create configmap custom-logos-config \\\n  --namespace=openshift-config \\\n  --from-literal=MastheadDark=/path/to/file \\\n  --from-literal=MastheadLight=/path/to/file \\\n  --from-literal=FaviconDark=/path/to/file \\\n  --from-literal=FaviconLight=/path/to/file'\nThe ConfigMap keys should include file extensions for dark and light themes so that the console serves these files with the correct MIME type. Recommended Masthead and About Modal logo specifications: Image size must be less than 1 MB due to constraints on the ConfigMap size Dimensions: Max height of 68px and max width of 200px SVG format preferred Recommended Favicon specifications: Dimensions: Max height of 16px and max width of 16px PNG format preferred",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -46811,38 +46811,53 @@ func schema_openshift_api_operator_v1_CustomLogo(ref common.ReferenceCallback) c
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "CustomLogos defines a configuration based on theme types for the console UI logo.",
+				Description: "CustomLogo defines a configuration based on theme types for the console UI logo.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "type specifies the type of the logo for the console UI. It determines whether the logo is for the masthead or favicon. This field is an enum with valid values \"Masthead\" and \"Favicon\".",
+							Description: "type specifies the type of the logo for the console UI. It determines whether the logo is for the masthead or favicon. This field is an enum with valid values \"Masthead\" and \"Favicon\". Valid values: - \"Masthead\": When this value is provided, the logo will be used in the masthead or about modal of the console UI. - \"Favicon\": When this value is provided, the logo will be used as the favicon of the console UI.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"theme": {
+					"themes": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"type",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
-							Description: "theme specifies the theme type for the console UI logo. It determines whether the console should use the dark or light theme. This field is an enum with valid values \"Dark\" and \"Light\".",
+							Description: "themes specifies the themes for the console UI logo. This field is a list of themes, each with a Type and a RefName. Each theme determines whether the logo is for the dark or light theme of the console UI. The valid values for the Type field are \"Dark\" and \"Light\". The RefName field should reference the name of the ConfigMap that contains the logo files. Each item in the list must have a unique combination of Type and RefName.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openshift/api/operator/v1.Theme"),
+									},
+								},
+							},
+						},
+					},
+					"refName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "refName is the reference to a specific ConfigMap name in the openshift-config namespace containing custom logo files. The ConfigMap must be created with the appropriate keys and file extensions to ensure the console serves the file with the correct MIME type. The required keys are \"MastheadDark\", \"MastheadLight\", \"FaviconDark\", and \"FaviconLight\".",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
-						},
-					},
-					"path": {
-						SchemaProps: spec.SchemaProps{
-							Description: "path is the reference to a specific file within a ConfigMap in the openshift-config namespace. This field allows the console to locate and use the specified file containing a custom logo. The ConfigMap must be created with the appropriate keys and file extensions to ensure the console serves the file with the correct MIME type. The keys are \"Masthead-Dark\", \"Masthead-Light\", \"Favicon-Dark\", and \"Favicon-Light\".",
-							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/openshift/api/config/v1.ConfigMapFileReference"),
 						},
 					},
 				},
-				Required: []string{"type", "theme", "path"},
+				Required: []string{"type", "themes", "refName"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.ConfigMapFileReference"},
+			"github.com/openshift/api/operator/v1.Theme"},
 	}
 }
 
@@ -55953,6 +55968,36 @@ func schema_openshift_api_operator_v1_SyslogLoggingDestinationParameters(ref com
 					},
 				},
 				Required: []string{"address", "port"},
+			},
+		},
+	}
+}
+
+func schema_openshift_api_operator_v1_Theme(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Theme defines a theme type for the console UI.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "type specifies the type of the logo for the console UI. This field is an enum with valid values \"Dark\" and \"Light\". The type determines whether the logo is for the dark or light theme. When \"Dark\" is provided, the corresponding logo for the dark theme will be used in the console UI. When \"Light\" is provided, the corresponding logo for the light theme will be used in the console UI.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"refKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "refKey is the key pointing to a specific key/value inside the ConfigMap. This field is an enum with valid values \"MastheadDark\", \"MastheadLight\", \"FaviconDark\", and \"FaviconLight\". When \"MastheadDark\" is provided in the ConfigMap, the referenced logo for the dark theme will be used in the masthead of the console UI. When \"MastheadLight\" is provided in the ConfigMap, the referenced logo for the light theme will be used in the masthead of the console UI. When \"FaviconDark\" is provided in the ConfigMap, the referenced logo for the dark theme will be used in the favicon of the console UI. When \"FaviconLight\" is provided in the ConfigMap, the referenced logo for the light theme will be used in the favicon of the console UI.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"type", "refKey"},
 			},
 		},
 	}
